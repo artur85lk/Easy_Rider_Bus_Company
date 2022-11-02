@@ -1,40 +1,50 @@
-
-
 import json
-import re
+
 
 date = input()
+# date = [
+#     {
+#         "bus_id": 512,
+#         "stop_id": 4,
+#         "stop_name": "Bourbon Street",
+#         "next_stop": 6,
+#         "stop_type": "S",
+#         "a_time": "08:13"
+#     },
+#     {
+#         "bus_id": 512,
+#         "stop_id": 6,
+#         "stop_name": "Sunset Boulevard",
+#         "next_stop": 0,
+#         "stop_type": "F",
+#         "a_time": "08:16"
+#     }
+# ]
 # date = json.dumps(date)  # do testów
 
 y = json.loads(date)
+step = []
 
-line = {}
+for i in y:
+    step.append([i["stop_name"], i["a_time"], i["bus_id"]])
+last_value = 0
+counter = 0
 good = True
-
-for i in y:
-    line[i["bus_id"]] = ""
-for i in y:
-    line[i["bus_id"]] += i["stop_type"]
-for k, v in line.items():
-    if not bool(re.match(r'S.?.?.?.?F', v)):
-        print(f"There is no start or end stop for the line: {k}.")
+rong_step = True
+print(f"Arrival time test:")
+for s, v, k in step:
+    new_v = [int(v[0:2] + v[3:5]), k]
+    if counter == 0:
+        last_value = new_v
+    if counter > 0 and last_value[0] > new_v[0] and new_v[1] == last_value[1] and rong_step:
+        print(f"bus_id line {k}: wrong time on station {s}")
         good = False
-# transfer
-transfer = []
-for i in y:
-    more_two = 0
-    for j in y:
-        if j["stop_name"] == i["stop_name"]:
-            more_two += 1
-    if more_two > 1:
-        transfer.append(i["stop_name"])
-    more_two = 0
-
-start = sorted(list(set([i["stop_name"] for i in y if i["stop_type"] == "S"])))
-transfer = sorted(list(set(transfer)))
-# transfer = [i["stop_name"] for i in y if not re.match(r'[FS]', i["stop_type"])]
-finish = sorted(list(set([i["stop_name"] for i in y if i["stop_type"] == "F"])))
+        rong_step = False
+    if new_v[1] != last_value[1]:
+        rong_step = True
+    last_value = new_v
+    counter += 1
 if good:
-    print(f"Start stops: {len(start)} {start}")
-    print(f"Transfer stops: {len(transfer)} {transfer}")
-    print(f"Finish stops: {len(finish)} {finish}")
+    print("OK")
+
+
